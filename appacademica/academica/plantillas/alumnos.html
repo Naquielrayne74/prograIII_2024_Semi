@@ -1,0 +1,187 @@
+<form id="frmAlumno" data-accion="nuevo" data-idalumno="0">
+    <div class="card text-bg-dark mb-3" style="min-width: 700px;">
+        <div class="card-header">
+            <div class="d-flex">
+                Registro de Alumnos
+                <div class="ms-auto">
+                    <button type="button" data-form="alumnos" class="btn-close btn-close-white" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row p-1">
+                <div class="col-3 col-md-2">CODIGO </div>
+                <div class="col-9 col-md-4">
+                    <input type="text" class="form-control" id="txtCodigoAlumno" name="txtCodigoAlumno" required oninput="validarCodigo(this)" required>
+                    <script>
+                        function validarCodigo(input) {
+                            const codigo_valor = input.value;
+                            const regex = /^[A-Za-z]{4}\d{6}$/;
+                            if (codigo_valor.length === 10) {
+                                if (!regex.test(codigo_valor)) {
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'bottom-end',
+                                        icon: "info",
+                                        title: "El código debe contener 4 letras y 6 números seguidos",
+                                        showConfirmButton: false,
+                                        timer: 3000
+                                    });
+                                }
+                            } else if (codigo_valor.length > 10) {
+                                input.value = codigo_valor.slice(0, 10);
+                            }
+                        }
+                    </script>
+                </div>
+            </div>
+            <div class="row p-1">
+                <div class="col-3 col-md-2">NOMBRE </div>
+                <div class="col-9 col-md-6">
+                    <input type="text" class="form-control" id="txtNombreAlumno" name="txtNombreAlumno" oninput="validarNombre(this)" required>
+                    <script>
+                        function validarNombre(input) {
+                            const nombre_valor = input.value;
+                            validar = /[^A-Za-záéíóúÁÉÍÓÚñÑ\s]/;
+                            if (validar.test(nombre_valor)) {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'bottom-end',
+                                    icon: "info",
+                                    title: "Solo se permiten letras (incluyendo acentos y ñ) y espacios en el nombre",
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                                input.value = nombre_valor.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ\s]/g, '');
+                                return false;
+                            }
+                            return true;
+                        }
+                    </script>
+                </div>
+            </div>
+            <div class="row p-1">
+                <div class="col-3 col-md-2">DIRECCION</div>
+                <div class="col-9 col-md-10">
+                    <input type="text" class="form-control" id="txtDireccionAlumno" name="txtDireccionAlumno" required>
+                </div>
+            </div>
+            <div class="row p-1">
+                <div class="col-3 col-md-2">TELEFONO </div>
+                <div class="col-9 col-md-4">
+                    <input type="text" class="form-control" id="txtTelefonoAlumno" name="txtTelefonoAlumno" placeholder="0000-0000" oninput="validarTelefono(this)" required>
+                    <script>
+                        function validarTelefono(input) {
+                            const telefono_valor = input.value;
+                            const regexTel = /^\d{4}-\d{4}$/;
+
+                            if (telefono_valor.length === 9) {
+                                if (!regexTel.test(telefono_valor)) {
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'bottom-end',
+                                        icon: "info",
+                                        title: "El número de teléfono debe estar en el formato 0000-0000",
+                                        showConfirmButton: false,
+                                        timer: 3000
+                                    });
+                                    return false;
+                                }
+                            } else if (telefono_valor.length > 9) {
+                                input.value = telefono_valor.slice(0, 9);
+                            }
+                            return true;
+                        }
+                    </script>
+                </div>
+            </div>
+            <div class="row p-1">
+                <div class="col-12 col-md-4 text-center d-grid gap-2">
+                    <button type="submit" class="btn btn-outline-primary">Guardar</button>
+                </div>
+                <div class="col-12 col-md-4 text-center d-grid gap-2">
+                    <button type="reset" class="btn btn-outline-warning">Nuevo</button>
+                </div>
+                <div class="col-12 col-md-4 text-center d-grid gap-2">
+                    <button type="button" class="btn btn-outline-success" onclick="abrirVentana('busqueda_alumnos')">BUSCAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    document.querySelector('#frmAlumno').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const txtTelefonoAlumno = document.querySelector('#txtTelefonoAlumno');
+
+        if (!validarTelefono(txtTelefonoAlumno)) {
+            return false;
+        }
+
+        let datos = {
+            accion: frmAlumno.dataset.accion,
+            idAlumno: frmAlumno.dataset.idalumno,
+            codigo: txtCodigoAlumno.value,
+            nombre: txtNombreAlumno.value,
+            direccion: txtDireccionAlumno.value,
+            telefono: txtTelefonoAlumno.value
+        };
+        enviarDatosAlumno(datos);
+    });
+
+    function enviarDatosAlumno(datos) {
+        fetch('guardar_alumno/', {
+                method: 'POST',
+                body: JSON.stringify(datos)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.msg === 'ok') {
+                    consultarAlumnos();
+                    limpiarDatosAlumnos();
+
+                    
+                    let mensaje = datos.accion === 'nuevo' ? "Registro agregado con éxito" : "Registro eliminado con éxito";
+                    
+                    Swal.fire({
+                        toast: true,
+                        position: 'bottom-end',
+                        icon: "success",
+                        title: mensaje,
+                        showConfirmButton: false,
+                        timer: 2050
+                    });
+                }
+            })
+            .catch(err => console.log(err));
+    }
+
+    function modificarAlumno(alumno) {
+        frmAlumno.dataset.accion = 'modificar';
+        frmAlumno.dataset.idalumno = alumno.id;
+        txtCodigoAlumno.value = alumno.codigo;
+        txtNombreAlumno.value = alumno.nombre;
+        txtDireccionAlumno.value = alumno.direccion;
+        txtTelefonoAlumno.value = alumno.telefono;
+    }
+
+    function eliminarAlumno(idAlumno) {
+        frmAlumno.dataset.accion = 'eliminar';
+        frmAlumno.dataset.idalumno = idAlumno;
+
+        let datos = {
+            accion: frmAlumno.dataset.accion,
+            idAlumno: idAlumno,
+        };
+        enviarDatosAlumno(datos);
+    }
+
+    function limpiarDatosAlumnos() {
+        frmAlumno.dataset.accion = 'nuevo';
+        frmAlumno.dataset.idalumno = '';
+        txtCodigoAlumno.value = '';
+        txtNombreAlumno.value = '';
+        txtDireccionAlumno.value = '';
+        txtTelefonoAlumno.value = '';
+    }
+</script>
