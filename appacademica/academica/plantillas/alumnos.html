@@ -14,45 +14,24 @@
                 <div class="col-9 col-md-4">
                     <input type="text" class="form-control" id="txtCodigoAlumno" name="txtCodigoAlumno" required oninput="validarCodigo(this)" required>
                     <script>
-                       /* function validarCodigo(input){
+                        function validarCodigo(input) {
                             const codigo_valor = input.value;
-                            const regex = /^[A-Za-z]{4}\d{6}$/; 
-                            //Validar 
-                            if(codigo_valor.length === 10){
-                                if(!regex.test(codigo_valor)){
+                            const regex = /^[A-Za-z]{4}\d{6}$/;
+                            if (codigo_valor.length === 10) {
+                                if (!regex.test(codigo_valor)) {
                                     Swal.fire({
                                         toast: true,
                                         position: 'bottom-end',
                                         icon: "info",
-                                        title: "El codigo debe contener 4 letras y 6 numeros seguidos",
+                                        title: "El código debe contener 4 letras y 6 números seguidos",
                                         showConfirmButton: false,
                                         timer: 3000
                                     });
-                                } 
+                                }
+                            } else if (codigo_valor.length > 10) {
+                                input.value = codigo_valor.slice(0, 10);
                             }
-                        }*/
-
-                    function validarCodigo(input) {
-                        const codigo_valor = input.value;
-                        const regex = /^[A-Za-z]{4}\d{6}$/; 
-                        //valida si el codigo tiene 10 valores (4 letras y 6 numeros)
-                        if (codigo_valor.length === 10) {
-                            if (!regex.test(codigo_valor)) { 
-                                Swal.fire({
-                                    toast: true,
-                                    position: 'bottom-end',
-                                    icon: "info",
-                                    title: "El código debe contener 4 letras y 6 números seguidos",
-                                    showConfirmButton: false,
-                                    timer: 3000
-                                });
-                            }
-                        } else if (codigo_valor.length > 10) {
-                            // solo permite los 10, sino lo borra
-                            input.value = codigo_valor.slice(0, 10);
                         }
-                    }
-
                     </script>
                 </div>
             </div>
@@ -73,10 +52,10 @@
                                     showConfirmButton: false,
                                     timer: 3000
                                 });
-                                // Elimina lo que no se permite
                                 input.value = nombre_valor.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ\s]/g, '');
                                 return false;
-                            } return true;
+                            }
+                            return true;
                         }
                     </script>
                 </div>
@@ -92,12 +71,12 @@
                 <div class="col-9 col-md-4">
                     <input type="text" class="form-control" id="txtTelefonoAlumno" name="txtTelefonoAlumno" placeholder="0000-0000" oninput="validarTelefono(this)" required>
                     <script>
-                        function validarTelefono(input){
+                        function validarTelefono(input) {
                             const telefono_valor = input.value;
-                            const regexTel= /^\d{4}-\d{4}$/;
+                            const regexTel = /^\d{4}-\d{4}$/;
 
-                            if(telefono_valor.length===9){
-                                if(!regexTel.test(telefono_valor)){
+                            if (telefono_valor.length === 9) {
+                                if (!regexTel.test(telefono_valor)) {
                                     Swal.fire({
                                         toast: true,
                                         position: 'bottom-end',
@@ -105,15 +84,14 @@
                                         title: "El número de teléfono debe estar en el formato 0000-0000",
                                         showConfirmButton: false,
                                         timer: 3000
-                                    }); 
-                                    return false;  
+                                    });
+                                    return false;
                                 }
-                            } else if(telefono_valor.length > 9){
-                                input.value = telefono_valor.slice(0, 9);      
-                            } 
+                            } else if (telefono_valor.length > 9) {
+                                input.value = telefono_valor.slice(0, 9);
+                            }
                             return true;
                         }
-
                     </script>
                 </div>
             </div>
@@ -132,58 +110,53 @@
     </div>
 </form>
 <script>
-    document.querySelector('#frmAlumno').addEventListener('submit', (e)=>{
+    document.querySelector('#frmAlumno').addEventListener('submit', (e) => {
         e.preventDefault();
         const txtTelefonoAlumno = document.querySelector('#txtTelefonoAlumno');
-        
-        if(!validarTelefono(txtTelefonoAlumno)){
+
+        if (!validarTelefono(txtTelefonoAlumno)) {
             return false;
         }
-        
+
         let datos = {
-            accion : frmAlumno.dataset.accion,
-            idAlumno : frmAlumno.dataset.idalumno,
-            codigo : txtCodigoAlumno.value,
-            nombre : txtNombreAlumno.value,
-            direccion : txtDireccionAlumno.value,
-            telefono : txtTelefonoAlumno.value
+            accion: frmAlumno.dataset.accion,
+            idAlumno: frmAlumno.dataset.idalumno,
+            codigo: txtCodigoAlumno.value,
+            nombre: txtNombreAlumno.value,
+            direccion: txtDireccionAlumno.value,
+            telefono: txtTelefonoAlumno.value
         };
         enviarDatosAlumno(datos);
     });
 
-    function enviarDatosAlumno(datos){
-        fetch('guardar_alumno/',{
-                method : 'POST',
-                body : JSON.stringify(datos)
+    function enviarDatosAlumno(datos) {
+        fetch('guardar_alumno/', {
+                method: 'POST',
+                body: JSON.stringify(datos)
             })
             .then(res => res.json())
             .then(data => {
-                if( data.msg==='ok' ){
+                if (data.msg === 'ok') {
                     consultarAlumnos();
                     limpiarDatosAlumnos();
+
+                    
+                    let mensaje = datos.accion === 'nuevo' ? "Registro agregado con éxito" : "Registro eliminado con éxito";
+                    
                     Swal.fire({
                         toast: true,
                         position: 'bottom-end',
                         icon: "success",
-                        title: "Registro agregado con éxito",
+                        title: mensaje,
                         showConfirmButton: false,
                         timer: 2050
-                    });    
-
+                    });
                 }
             })
             .catch(err => console.log(err));
-          /*  Swal.fire({
-                    toast: true,
-                    position: 'bottom-end',
-                    icon: "error",
-                    title: "Fallo en registrar",
-                    showConfirmButton: false,
-                    timer: 2050
-                });*/
     }
 
-    function modificarAlumno(alumno){
+    function modificarAlumno(alumno) {
         frmAlumno.dataset.accion = 'modificar';
         frmAlumno.dataset.idalumno = alumno.id;
         txtCodigoAlumno.value = alumno.codigo;
@@ -191,7 +164,19 @@
         txtDireccionAlumno.value = alumno.direccion;
         txtTelefonoAlumno.value = alumno.telefono;
     }
-    function limpiarDatosAlumnos(){
+
+    function eliminarAlumno(idAlumno) {
+        frmAlumno.dataset.accion = 'eliminar';
+        frmAlumno.dataset.idalumno = idAlumno;
+
+        let datos = {
+            accion: frmAlumno.dataset.accion,
+            idAlumno: idAlumno,
+        };
+        enviarDatosAlumno(datos);
+    }
+
+    function limpiarDatosAlumnos() {
         frmAlumno.dataset.accion = 'nuevo';
         frmAlumno.dataset.idalumno = '';
         txtCodigoAlumno.value = '';
